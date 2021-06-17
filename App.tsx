@@ -1,26 +1,18 @@
 import React from "react";
 
-import { Button, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import { createStackNavigator } from "@react-navigation/stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 
 import Header from "./src/components/shared/Header.component";
+import Login from "./src/components/login/Login.page";
 
 function Home() {
     return (
         <View style={styles.innerContainer}>
             <Text>This is the home!</Text>
-        </View>
-    );
-}
-
-function Login(props: any) {
-    return (
-        <View style={styles.innerContainer}>
-            <Text>This is the login!</Text>
-            <Button title="Entrar" onPress={() => props.navigation.navigate("Home")} />
         </View>
     );
 }
