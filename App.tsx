@@ -1,6 +1,6 @@
 import React from "react";
 
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { createStackNavigator } from "@react-navigation/stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -8,14 +8,7 @@ import { NavigationContainer } from "@react-navigation/native";
 
 import Header from "./src/components/shared/Header.component";
 import Login from "./src/components/login/Login.page";
-
-function Home() {
-    return (
-        <View style={styles.innerContainer}>
-            <Text>This is the home!</Text>
-        </View>
-    );
-}
+import Home from "./src/components/home/Home.page";
 
 export default function App() {
     const Stack = createStackNavigator();
@@ -47,12 +40,5 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#fff",
         flexDirection: "column",
-    },
-    innerContainer: {
-        flex: 1,
-        backgroundColor: "#fff",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
     },
 });
