@@ -1,39 +1,53 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Dimensions,
-    StyleSheet,
-    View,
-    TextInput,
     Platform,
+    StyleSheet,
+    TextInput,
     TouchableOpacity,
+    View,
 } from "react-native";
+
 import { Picker } from "@react-native-picker/picker";
+
 import { Ionicons } from "@expo/vector-icons";
+import { useInput } from "../../../../hooks/useInput.hook";
+import { usePerson } from "../../../../hooks/usePerson.hook";
+import Person from "../../../../domain/Person";
 
 export default function CalculatorForm() {
-    const [gender, setGender] = useState("Não Informar");
+    const [dilution, setDilution] = useState("Não Informar");
+    const [, setData] = usePerson();
     const [iosPickerOpen, setIosPickerOpen] = useState(false);
+    const [height, heightProps, ] = useInput("");
+    const [weight, weightProps, ] = useInput("");
 
-    const renderPickerAndroid = () => {
-        if (Platform.OS !== "android") return null;
-        return (
-            <View style={[{ flex: 1 }, styles.pickerAndroid]}>
-                <Picker
-                    style={styles.input}
-                    prompt="sexo"
-                    mode="dialog"
-                    selectedValue={gender}
-                    onValueChange={(value) => {
-                        setGender(value);
-                    }}
-                >
-                    <Picker.Item value={"Feminino"} label="Feminino" />
-                    <Picker.Item value={"Masculino"} label="Masculino" />
-                    <Picker.Item value={"Não Informar"} label="Não Informar" />
-                </Picker>
-            </View>
-        );
-    };
+    useEffect(() => {
+        if (height && weight) {
+            const floatHeight = parseFloat(height.replace(',', '.'));
+            const floatWeight = parseFloat(weight.replace(',', '.'));
+            if(!isNaN(floatHeight) && !isNaN(floatWeight)) {
+                console.log('calculating IMC...');
+                calculateImc(floatHeight, floatWeight);
+            } else {
+                console.log('There is value, but still invalid...');
+            }
+        }
+    }, [height, weight]);
+
+    const calculateImc = (theHeight: number, theWeight: number) => {
+        console.log(theHeight);
+        console.log(theWeight);
+        const person = new Person(theHeight, theWeight);
+        person.imc = theWeight / (theHeight ** 2);
+
+        if (person.imc < 18.5) person.imcDescription = "Magreza";
+        else if (person.imc < 24.9) person.imcDescription = "Normal";
+        else if (person.imc <= 30.0) person.imcDescription = "Sobrepeso";
+        else if (person.imc > 30.0) person.imcDescription = "Obesidade";
+        console.log(person);
+        setData(person);
+    }
 
     function renderPickerIOS() {
         if (Platform.OS !== "ios") return null;
@@ -49,7 +63,7 @@ export default function CalculatorForm() {
                             placeholder="Sexo"
                             autoCapitalize="none"
                             allowFontScaling={true}
-                            value={gender}
+                            value={dilution}
                             editable={false}
                         />
                         <TouchableOpacity
@@ -69,20 +83,36 @@ export default function CalculatorForm() {
                         style={[styles.input, styles.pickerIos]}
                         prompt="Sexo"
                         mode="dialog"
-                        selectedValue={gender}
+                        selectedValue={dilution}
                         onValueChange={(value) => {
                             setIosPickerOpen(false);
-                            setGender(value);
+                            setDilution(value);
                         }}
                     >
                         <Picker.Item value={"Feminino"} label="Feminino" />
                         <Picker.Item value={"Masculino"} label="Masculino" />
-                        <Picker.Item
-                            value={"Não Informar"}
-                            label="Não Informar"
-                        />
+                        <Picker.Item value={"Não Informar"} label="Não Informar" />
                     </Picker>
                 ) : null}
+            </View>
+        );
+    }
+
+    function renderPickerAndroid() {
+        if (Platform.OS === "ios") return null;
+        return (
+            <View style={[{ flex: 1 }, styles.pickerAndroid]}>
+                <Picker
+                    style={styles.input}
+                    prompt="Sexo"
+                    mode="dialog"
+                    selectedValue={dilution}
+                    onValueChange={(value) => setDilution(value)}
+                >
+                    <Picker.Item value={"Feminino"} label="Feminino" />
+                    <Picker.Item value={"Masculino"} label="Masculino" />
+                    <Picker.Item value={"Não Informar"} label="Não Informar" />
+                </Picker>
             </View>
         );
     }
@@ -90,18 +120,22 @@ export default function CalculatorForm() {
     return (
         <View style={styles.fields}>
             {!iosPickerOpen ? (
-                <View style={{ flex: 2 }}>
+                <View style={{flex: 2}}>
                     <TextInput
                         style={styles.input}
                         placeholder="Peso (kg)"
                         autoCapitalize="none"
                         allowFontScaling={true}
+                        keyboardType="decimal-pad"
+                        {...weightProps}
                     />
                     <TextInput
                         style={styles.input}
                         placeholder="Altura (m)"
                         autoCapitalize="none"
                         allowFontScaling={true}
+                        keyboardType="decimal-pad"
+                        {...heightProps}
                     />
                 </View>
             ) : null}
@@ -124,15 +158,6 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: "#aaa",
     },
-    pickerAndroid: {
-        borderBottomWidth: 1,
-        borderBottomColor: "#aaa",
-        ...Platform.select({
-            ios: {
-                display: "none",
-            },
-        }),
-    },
     pickerAreaIos: {
         flex: 1,
         display: "flex",
@@ -152,6 +177,15 @@ const styles = StyleSheet.create({
     pickerIos: {
         ...Platform.select({
             android: {
+                display: "none",
+            },
+        }),
+    },
+    pickerAndroid: {
+        borderBottomWidth: 1,
+        borderBottomColor: "#aaa",
+        ...Platform.select({
+            ios: {
                 display: "none",
             },
         }),
