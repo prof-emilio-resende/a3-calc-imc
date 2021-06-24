@@ -25,7 +25,7 @@ export default function Home() {
     const Tab = createBottomTabNavigator();
 
     return (
-        <Tab.Navigator>
+        <Tab.Navigator initialRouteName="Home.Calculator">
             <Tab.Screen
                 name="Home.About"
                 component={About}

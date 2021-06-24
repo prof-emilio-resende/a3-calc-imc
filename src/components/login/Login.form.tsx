@@ -7,8 +7,42 @@ import {
     TouchableOpacity,
     Dimensions,
 } from "react-native";
+import User from "../../domain/User";
+import { useInput } from "../../hooks/useInput.hook";
+import { useUser } from "../../hooks/useUser.hook";
+import { authenticate } from "../../utils/authentication.service";
+import { BadCredentialsAuthError } from "../../utils/errors/AuthErrors";
 
 export default function LoginForm(props: any) {
+    const [, setUser, resetUser] = useUser();
+    const [username, usernameProps, resetUsername] = useInput("");
+    const [password, passwordProps, resetPassword] = useInput("");
+
+    const login = async () => {
+        if (!username || !password) {
+            alert("Hey, c'mon ... username and password are required!");
+            return;
+        }
+
+        try {
+            const response = await authenticate(username, password);
+            setUser(new User(username, response.accessToken));
+            resetUsername();
+            resetPassword();
+            props.navigation.navigate("Home")
+
+            return;
+        } catch (ex) {
+            if (ex instanceof BadCredentialsAuthError) {
+                alert("Wrong username or password.");
+                
+            } else {
+                alert("Ouch, something is really wrong... :(");
+            }
+        }
+
+        resetUser();
+    }
 
     return (
         <View style={styles.container}>
@@ -19,12 +53,15 @@ export default function LoginForm(props: any) {
                     placeholder="Nome de usuário"
                     autoCapitalize="none"
                     allowFontScaling={true}
+                    {...usernameProps}
                 />
                 <TextInput
                     style={styles.input}
                     placeholder="Senha"
+                    autoCapitalize="none"
                     secureTextEntry={true}
                     allowFontScaling={true}
+                    {...passwordProps}
                 />
                 <TouchableOpacity
                     style={styles.forgetPasswordLink}
@@ -39,7 +76,7 @@ export default function LoginForm(props: any) {
 
             <View style={styles.actions}>
                 <TouchableOpacity
-                    onPress={() => props.navigation.navigate("Home")}
+                    onPress={() => login()}
                     style={styles.btnLogin}
                 >
                     <Text style={styles.btnLoginText}>Entrar</Text>
